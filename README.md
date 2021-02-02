@@ -44,4 +44,4 @@ This project is a skeleton project for using [HAPI FHIR](https://hapifhir.io) to
 
 * [ ] Commit your work
 
-...
+.
