@@ -12,10 +12,7 @@ import org.hl7.fhir.r4.model.Patient;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class SampleClient2 implements IClientInterceptor {
@@ -45,7 +42,6 @@ public class SampleClient2 implements IClientInterceptor {
         Bundle response = client
                 .search()
                 .forResource("Patient")
-                //.where(Patient.FAMILY.matches().value("SMITH"))
                 .where(Patient.FAMILY.matches().values(patientList))
                 .returnBundle(Bundle.class)
                 .execute();
@@ -56,24 +52,25 @@ public class SampleClient2 implements IClientInterceptor {
     // found one example:
     // https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/LoggingInterceptor.java
     @Override
-    public void interceptRequest(IHttpRequest theRequest) {
+    public void interceptRequest(IHttpRequest theRequest)
+    {
         // Not sure what for I should use it for.
-        System.out.println("Client request: {}" + theRequest);
+        System.out.println("Client request: {}" + theRequest + " *");
         try {
             String content = theRequest.getRequestBodyFromStream();
-            if (content != null) {
-                System.out.println("Client request body:\n{}" + content);
-            }
+            String verb = theRequest.getHttpVerbName();
+            Map<String, List<String>>  h = theRequest.getAllHeaders();
+            System.out.println("Client request body:\n{}" + content + " * " + verb);
+            h.forEach((key, value) -> System.out.println(key + ":" + value));
         } catch (IllegalStateException | IOException e) {
             System.out.println("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)" + e);
         }
     }
 
-
     @Override
-    public void interceptResponse(IHttpResponse theResponse) throws IOException {
+    public void interceptResponse(IHttpResponse theResponse) throws IOException
+    {
         // Not sure what for I should use it for.
-
         String message = "HTTP " + theResponse.getStatus() + " " + theResponse.getStatusInfo();
         String respLocation = "";
 
@@ -81,7 +78,8 @@ public class SampleClient2 implements IClientInterceptor {
          * Add response location
          */
         List<String> locationHeaders = theResponse.getHeaders(Constants.HEADER_LOCATION);
-        if (locationHeaders == null || locationHeaders.isEmpty()) {
+        if (locationHeaders == null || locationHeaders.isEmpty())
+        {
             locationHeaders = theResponse.getHeaders(Constants.HEADER_CONTENT_LOCATION);
         }
         String timing = theResponse.getRequestStopWatch().toString();
